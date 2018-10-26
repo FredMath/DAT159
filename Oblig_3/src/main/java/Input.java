@@ -16,8 +16,6 @@ public class Input {
     public Input(String prevTxHash, int prevOutputIndex) {
 	    this.prevTxHash  = prevTxHash;
 	    this.prevOutputIndex = prevOutputIndex;
-	    //TODO
 	}
 
-    //TODO Getters?
 }

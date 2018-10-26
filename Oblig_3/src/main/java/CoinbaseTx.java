@@ -8,9 +8,8 @@ public class CoinbaseTx {
 
 	public CoinbaseTx(String coinbase, int value, String address) {
 	    this.coinbase = coinbase;
-	    this.txHash = HashUtil.base64Encode(HashUtil.sha256Hash(coinbase + output));
+	    this.txHash = HashUtil.base64Encode(HashUtil.sha256Hash(coinbase + value));
         output = new Output(value, address);
-	    //TODO
 	    //Remember to calculate txHash
 	}
 
@@ -41,11 +40,10 @@ public class CoinbaseTx {
     @Override
     public String toString() {
         return "CoinbaseTx{" +
-                "coinbase='" + coinbase + '\'' +
-                ", output=" + output +
-                ", txHash='" + txHash + '\'' +
+                "coinbase = " + coinbase + "\n" +
+                "output = " + output + "\n" +
+                "txHash = " + txHash + "\n" +
                 '}';
     }
-    //TODO Getters?
-	
+
 }

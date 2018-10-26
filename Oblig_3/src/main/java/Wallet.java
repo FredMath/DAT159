@@ -11,14 +11,13 @@ public class Wallet {
 
     //A refererence to the "global" complete utxo-set
     private Map<Input, Output> utxoMap;
-    private long balance;
 
     public Wallet(String id, UTXO utxo) {
         this.id = id;
         this.utxoMap = utxo.getMap();
         keyPair = DSAUtil.generateRandomDSAKeyPair();
+        this.address = HashUtil.addressFromPublicKey(keyPair.getPublic());
 
-        //TODO
     }
 
     public String getAddress() {
@@ -32,7 +31,6 @@ public class Wallet {
 
     public Transaction createTransaction(long value, String address) throws Exception {
 
-        //TODO - This is a big one
 
         // 1. Collect all UTXO for this wallet and calculate balance
         Map<Input, Output> myUTXO = collectMyUtxo();
@@ -45,12 +43,14 @@ public class Wallet {
         // 3. Choose a number of UTXO to be spent --- Strategy?
         newTxOutputs = 0;
         ArrayList<Input> chosenTxs = new ArrayList<>();
-        while (newTxOutputs < value) {
-            myUTXO.forEach((input, output) -> {
-                newTxOutputs = output.getValue();
+
+        myUTXO.forEach((input, output) -> {
+            if (newTxOutputs < value) {
+                newTxOutputs += output.getValue();
                 chosenTxs.add(input);
-            });
-        }
+            }
+        });
+
 
         // 4. Calculate change
         long diff = newTxOutputs - value;
@@ -58,7 +58,8 @@ public class Wallet {
         // 5. Create an "empty" transaction
         Transaction tx = new Transaction(keyPair.getPublic());
         // 6. Add chosen inputs
-        chosenTxs.forEach(tx::addInput);
+        for (Input i : chosenTxs)
+            tx.addInput(i);
 
         // 7. Add 1 or 2 outputs, depending on change
         tx.addOutput(new Output(value, address));
@@ -80,35 +81,29 @@ public class Wallet {
 
     @Override
     public String toString() {
-        //TODO
-        return null;
+        return "Wallet{" +
+                "id='" + id + '\'' +
+                ", address='" + address + '\'' +
+                ", balance=" + calculateBalance(collectMyUtxo().values()) +
+                '}';
     }
 
-    public long getBalance() {
-        return balance;
-    }
 
-    //TODO Getters?
-
-    private long calculateBalance(Collection<Output> outputs) {
-        outputs.forEach((output) -> balance = balance + output.getValue());
-
+    public long calculateBalance(Collection<Output> outputs) {
+        long balance = 0;
+        for (Output o : outputs)
+            balance += o.getValue();
         return balance;
     }
 
     private Map<Input, Output> collectMyUtxo() {
-        Map<Input, Output> collected = utxoMap;
-        Iterator<Map.Entry<Input, Output>> it = utxoMap.entrySet().iterator();
-        try {
-            while (it.hasNext()) {
-                Map.Entry<Input, Output> entry = it.next();
-                if (entry.getValue().getAddress() != HashUtil.addressFromPublicKey(keyPair.getPublic())) {
-                    collected.remove(entry.getKey());
-                }
-            }
-        } catch (ConcurrentModificationException e) {
-            System.out.println("feil");
+        Map<Input, Output> collected = new HashMap<>();
+
+        for (Map.Entry<Input, Output> o : utxoMap.entrySet()) {
+            if (o.getValue().getAddress().equals(HashUtil.addressFromPublicKey(keyPair.getPublic())))
+                collected.put(o.getKey(), o.getValue());
         }
+
         return collected;
     }
 
