@@ -1,3 +1,5 @@
+package roomcontrol;
+
 public class Display {
 
     public void write(String message) {

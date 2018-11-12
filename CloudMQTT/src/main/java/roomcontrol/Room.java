@@ -1,3 +1,5 @@
+package roomcontrol;
+
 public class Room {
 
     private int tempstate;

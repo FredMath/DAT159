@@ -1,3 +1,5 @@
+package roomcontrol;
+
 public class TemperatureSensor {
 
     private Room room;

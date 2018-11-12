@@ -1,3 +1,7 @@
+package roomcontrol;
+
+import publish.MQTTPubTemp;
+
 public class RoomDevice {
 
     public static void main(String[] args) {
@@ -6,7 +10,7 @@ public class RoomDevice {
 
         TemperatureSensor sensor = new TemperatureSensor(room);
 
-        MQTTPubTemperature sensorpub = new MQTTPubTemperature(sensor);
+        MQTTPubTemp sensorpub = new MQTTPubTemp(sensor);
 
         try {
 
@@ -19,7 +23,7 @@ public class RoomDevice {
 
         } catch (Exception ex) {
 
-            System.out.println("RoomDevice: " + ex.getMessage());
+            System.out.println("roomcontrol.RoomDevice: " + ex.getMessage());
             ex.printStackTrace();
         }
 

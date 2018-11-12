@@ -1,97 +1,49 @@
 package publish;
 
-import org.eclipse.paho.client.mqttv3.MqttClient;
-import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
-import org.eclipse.paho.client.mqttv3.MqttPersistenceException;
-import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 import roomcontrol.TemperatureSensor;
 
-public class MQTTPubTemperature implements Runnable {
+public class MQTTPubTemp extends  MQTTPub implements Runnable{
 
-    private String topic = "Temp";
-    private int qos = 1;
-    private String broker = "tcp:m20.cloudmqtt.com:18403";
-    private String clientId = "MQTT_Temperature";
-    private String username = "ftrzraoc";
-    private String password = "fF1-j_VU_KqM";
+    private String topic;
+    private int qos;
 
-    private MqttClient publisherClient;
+    private TemperatureSensor sensor;
 
-    TemperatureSensor sensor;
 
-    public MQTTPubTemperature(TemperatureSensor sensor) {
-
+    public MQTTPubTemp(TemperatureSensor sensor) {
+        super();
+        topic = "Temp";
+        qos = 1;
         this.sensor = sensor;
     }
 
-    private void publish() throws MqttPersistenceException, MqttException, InterruptedException {
-
-        for (int i = 0; i < 10; i++) {
+    public void publish() throws MqttException, InterruptedException {
+        while (true) {
 
             String temp = String.valueOf(sensor.read());
-
             System.out.println("Publishing message: " + temp);
-
             MqttMessage message = new MqttMessage(temp.getBytes());
             message.setQos(qos);
-
-            publisherClient.publish(topic, message);
-
+            getPublisherClient().publish(topic, message);
             Thread.sleep(10000);
         }
 
     }
-
-    private void connect() {
-
-        MemoryPersistence persistence = new MemoryPersistence();
-
-        try {
-            publisherClient = new MqttClient(broker, clientId, persistence);
-            MqttConnectOptions connOpts = new MqttConnectOptions();
-            connOpts.setCleanSession(true);
-            connOpts.setUserName(username);
-            connOpts.setPassword(password.toCharArray());
-            System.out.println("Connecting to broker: " + broker);
-            publisherClient.connect(connOpts);
-            System.out.println("Connected");
-
-        } catch (MqttException e) {
-            System.out.println("reason " + e.getReasonCode());
-            System.out.println("msg " + e.getMessage());
-            System.out.println("loc " + e.getLocalizedMessage());
-            System.out.println("cause " + e.getCause());
-            System.out.println("excep " + e);
-            e.printStackTrace();
-        }
-    }
-
-    private void disconnect() throws MqttException {
-
-        publisherClient.disconnect();
-
-    }
-
+    @Override
     public void run() {
-
         try {
-
-            System.out.println("Sensor publisher running");
-
             connect();
-
+            System.out.println("Sensor publisher running");
             publish();
-
-            disconnect();
-
+            Disconnect();
             System.out.println("Sensor publisher stopping");
+        } catch (InterruptedException | MqttException e){
+            System.out.println("sensor publishing: " + e.getMessage());
+            e.printStackTrace();
 
-        } catch (Exception ex) {
-            System.out.println("Sensor publisher: " + ex.getMessage());
-            ex.printStackTrace();
         }
-
     }
+
 }

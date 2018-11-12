@@ -1,3 +1,5 @@
+package roomcontrol;
+
 public class Heating {
 
     private Room room;

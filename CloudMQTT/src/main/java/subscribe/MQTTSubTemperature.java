@@ -1,88 +1,30 @@
-import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
-import org.eclipse.paho.client.mqttv3.MqttCallback;
-import org.eclipse.paho.client.mqttv3.MqttClient;
-import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
+package subscribe;
+
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
-import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
-import roomcontrol.Display;
+import publish.MQTTPubHeat;
 
-public class MQTTSubTemperature implements MqttCallback {
+public abstract class MQTTSubTemperature extends MQTTSub implements Runnable {
 
-    private String message;
-    private Display display;
+    private MQTTPubHeat pubHeating;
 
-    public MQTTSubTemperature(Display display) throws MqttException {
 
-        String topic = "Temp";
-        int qos = 1; // 1 - This client will acknowledge to the Device Gateway that messages are received
-        String broker = "tcp:m20.cloudmqtt.com:18403";
-        String clientId = "MQTT_Temperature";
-        String username = "ftrzraoc";
-        String password = "fF1-j_VU_KqM";
+    public MQTTSubTemperature(MQTTPubHeat pubHeating) throws MqttException {
+        super();
+        this.pubHeating = pubHeating;
+    }
 
-        this.display = display;
+    @Override
+    public void messageArrived(String topic, MqttMessage message) {
+        try {
+            double temp = Double.parseDouble(new String(message.getPayload()));
+            pubHeating.publish(temp < 20 ? "ON" : "OFF");
 
-        MqttConnectOptions connOpts = new MqttConnectOptions();
-        connOpts.setCleanSession(true);
-        connOpts.setUserName(username);
-        connOpts.setPassword(password.toCharArray());
-
-        System.out.println("Connecting to broker: " + broker);
-
-        MqttClient client = new MqttClient(broker, clientId, new MemoryPersistence());
-        client.setCallback(this);
-        client.connect(connOpts);
-        System.out.println("Connected");
-
-        client.subscribe(topic, qos);
-        System.out.println("Subscribed to message");
+        } catch (NumberFormatException e) {
+            e.printStackTrace();
+        }
 
     }
 
-    /**
-     * @see MqttCallback#connectionLost(Throwable)
-     */
-    public void connectionLost(Throwable cause) {
-        System.out.println("Connection lost because: " + cause);
-        System.exit(1);
-
-    }
-
-    /**
-     * @see MqttCallback#messageArrived(String, MqttMessage)
-     */
-    public void messageArrived(String topic, MqttMessage message) throws Exception {
-
-        String dismessage = String.format("[%s] %s", topic, new String(message.getPayload()));
-
-        display.write(dismessage);
-
-        this.setMessage(new String(message.getPayload()));
-    }
-
-    /**
-     * @see MqttCallback#deliveryComplete(IMqttDeliveryToken)
-     */
-    public void deliveryComplete(IMqttDeliveryToken token) {
-        // TODO Auto-generated method stub
-
-    }
-
-    public String getMessage() {
-        return message;
-    }
-
-    public void setMessage(String message) {
-        this.message = message;
-    }
-
-    public static void main(String args[]) throws MqttException {
-
-        Display display = new Display();
-
-        new MQTTSubTemperature(display);
-
-    }
 
 }
