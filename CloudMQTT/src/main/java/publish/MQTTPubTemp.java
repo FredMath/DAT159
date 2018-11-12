@@ -1,18 +1,21 @@
+package publish;
+
 import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.eclipse.paho.client.mqttv3.MqttPersistenceException;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
+import roomcontrol.TemperatureSensor;
 
 public class MQTTPubTemperature implements Runnable {
 
     private String topic = "Temp";
     private int qos = 1;
-    private String broker = "tcp://your-server.com:port";
+    private String broker = "tcp:m20.cloudmqtt.com:18403";
     private String clientId = "MQTT_Temperature";
-    private String username = "fixme";
-    private String password = "fixme";
+    private String username = "ftrzraoc";
+    private String password = "fF1-j_VU_KqM";
 
     private MqttClient publisherClient;
 

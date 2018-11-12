@@ -5,6 +5,7 @@ import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
+import roomcontrol.Display;
 
 public class MQTTSubTemperature implements MqttCallback {
 
@@ -14,12 +15,11 @@ public class MQTTSubTemperature implements MqttCallback {
     public MQTTSubTemperature(Display display) throws MqttException {
 
         String topic = "Temp";
-        int qos = 1; // 1 - This client will acknowledge to the Device Gateway that messages are
-        // received
-        String broker = "tcp://your-server.com:port";
-        String clientId = "MQTT_Temperature_SUB";
-        String username = "fixme";
-        String password = "fixme";
+        int qos = 1; // 1 - This client will acknowledge to the Device Gateway that messages are received
+        String broker = "tcp:m20.cloudmqtt.com:18403";
+        String clientId = "MQTT_Temperature";
+        String username = "ftrzraoc";
+        String password = "fF1-j_VU_KqM";
 
         this.display = display;
 
